@@ -1,9 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import axios from "axios";
-import * as dotenv from "dotenv";
 
-dotenv.config();
 admin.initializeApp();
 
 async function createUser(name: string, password: string) {
@@ -14,11 +12,11 @@ async function createUser(name: string, password: string) {
 
 async function createOmbiUser() {
   await axios.post(
-    process.env.OMBI_URL + "/api/v1/Job/embyUserImporter/",
+    functions.config().ombi.url + "/api/v1/Job/embyUserImporter/",
     {},
     {
       headers: {
-        ApiKey: process.env.OMBI_API_KEY,
+        ApiKey: functions.config().ombi.key,
       },
     }
   );
@@ -26,9 +24,9 @@ async function createOmbiUser() {
 
 async function createEmbyUser(name: string) {
   await axios.post(
-    process.env.EMBY_URL +
+    functions.config().emby.url +
       "/emby/Users/New?X-Emby-Token=" +
-      process.env.EMBY_API_KEY,
+      functions.config().emby.key,
     {
       Name: name,
     }
@@ -38,9 +36,9 @@ async function createEmbyUser(name: string) {
 
 async function embyUsernameExist(name: string) {
   const response = await axios.get(
-    process.env.EMBY_URL +
+    functions.config().emby.url +
       "/emby/Users/Query?api_key=" +
-      process.env.EMBY_API_KEY
+      functions.config().emby.key
   );
   const users = response.data.Items;
   const userExist = users.filter((e: any) => e.Name === name);
@@ -65,13 +63,17 @@ async function updateEmbyPassword(
   id: string
 ): Promise<boolean> {
   await axios.post(
-    `${process.env.EMBY_URL}/emby/Users/${id}/Password?X-Emby-Token=${process.env.EMBY_API_KEY}`,
+    `${functions.config().emby.url}/emby/Users/${id}/Password?X-Emby-Token=${
+      functions.config().emby.key
+    }`,
     {
       resetPassword: true,
     }
   );
   await axios.post(
-    `${process.env.EMBY_URL}/emby/Users/${id}/Password?X-Emby-Token=${process.env.EMBY_API_KEY}`,
+    `${functions.config().emby.url}/emby/Users/${id}/Password?X-Emby-Token=${
+      functions.config().emby.key
+    }`,
     {
       CurrentPw: "",
       NewPw: password,
@@ -81,31 +83,41 @@ async function updateEmbyPassword(
 }
 
 export const generateInvite = functions.https.onRequest((request, response) => {
-  admin
-    .firestore()
-    .collection("invites")
-    .doc()
-    .set({
-      used: false,
-    })
-    .then(() => {
-      response.send("invite generated");
-    });
+  try {
+    admin
+      .firestore()
+      .collection("invites")
+      .doc()
+      .set({
+        used: false,
+      })
+      .then(() => {
+        response.send("invite generated");
+      });
+  } catch (error) {
+    console.error(error);
+    response.status(500).send(error.message);
+  }
 });
 
 export const registerNewUser = functions.https.onRequest(
   async (request, response) => {
-    const data = request.body;
-    const invite = await isInviteValid(data.inviteCode, data.name);
-    const embyUser = await embyUsernameExist(data.name);
-    if (invite && embyUser) {
-      await updateEmbyPassword(data.password, embyUser.Id);
-      response.send("user exist");
-    } else if (invite) {
-      await createUser(data.name, data.password);
-      response.send("user created");
-    } else {
-      response.status(401).send("invite code invalid");
+    try {
+      const data = request.body;
+      const invite = await isInviteValid(data.inviteCode, data.name);
+      const embyUser = await embyUsernameExist(data.name);
+      if (invite && embyUser) {
+        await updateEmbyPassword(data.password, embyUser.Id);
+        response.send("user exist");
+      } else if (invite) {
+        await createUser(data.name, data.password);
+        response.send("user created");
+      } else {
+        response.status(401).send("invite code invalid");
+      }
+    } catch (error) {
+      console.error(error);
+      response.status(500).send(error.message);
     }
   }
 );
