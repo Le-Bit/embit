@@ -130,3 +130,4 @@ pnpm-debug.log*
 *.sw?
 
 .firebase
+.runtimeconfig.json
