@@ -4,16 +4,20 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "start": "concurrently 'cd functions && npm run build -- --watch' 'NODE_ENV=development vue-cli-service build --watch' 'firebase emulators:start' ",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "dotenv": "^8.6.0",
     "firebase": "^8.6.1",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
-    "vuex": "^4.0.0-0"
+    "vuex": "^4.0.0",
+    "vuex-easy-firestore": "^1.36.0",
+    "vuexfire": "^3.2.5"
   },
   "devDependencies": {
     "@types/jest": "^24.0.19",
@@ -30,6 +34,9 @@
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^2.0.0-0",
+    "browser-sync": "^2.26.14",
+    "browser-sync-webpack-plugin": "^2.3.0",
+    "concurrently": "^6.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^7.0.0",

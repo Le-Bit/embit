@@ -5,7 +5,7 @@ service cloud.firestore {
       allow read: if request.auth.uid == uid || request.auth.token.role == 'admin';
       allow write: if request.auth.uid == uid || request.auth.role == 'admin';
     }
-    match /invite/{uid} {
+    match /invites/{uid} {
       allow read, write: if request.auth.token.role == 'admin';
     }
   }

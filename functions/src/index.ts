@@ -4,10 +4,13 @@ import axios from "axios";
 
 admin.initializeApp();
 
+exports.claims = require("./sync");
+
 async function createUser(name: string, password: string) {
   const embyUser = await createEmbyUser(name);
   await createOmbiUser();
   await updateEmbyPassword(password, embyUser.Id);
+  return embyUser;
 }
 
 async function createOmbiUser() {
@@ -20,6 +23,27 @@ async function createOmbiUser() {
       },
     }
   );
+}
+
+async function authenticateUserWithEmby(
+  id: string,
+  password: string,
+  name: string
+) {
+  const result = await axios.post(
+    `${
+      functions.config().emby.url
+    }/emby/Users/${id}/Authenticate?X-Emby-Client=Embit&X-Emby-Device-Name=EmbitServer&X-Emby-Device-Id=CloudFunction&X-Emby-Client-Version=NA`,
+    {
+      Pw: password,
+    }
+  );
+  await admin
+    .firestore()
+    .collection("users")
+    .doc(name)
+    .update({ emby: result.data });
+  return result;
 }
 
 async function createEmbyUser(name: string) {
@@ -41,21 +65,25 @@ async function embyUsernameExist(name: string) {
       functions.config().emby.key
   );
   const users = response.data.Items;
+  //TODO remove Any
   const userExist = users.filter((e: any) => e.Name === name);
   return userExist[0]?.Name === name ? userExist[0] : undefined;
 }
 
 async function isInviteValid(invite: string, user: string): Promise<boolean> {
-  const inviteRef = admin.firestore().collection("invites").doc(invite);
-  //TODO unhandled error if invite is undefined
-  const doc = await inviteRef.get();
-  if (doc.exists && !doc.data()?.used) {
-    inviteRef.update({ used: true, usedBy: user });
-    return true;
-  } else if (doc?.data()?.used) {
+  try {
+    const inviteRef = admin.firestore().collection("invites").doc(invite);
+    const doc = await inviteRef.get();
+    if (doc.exists && !doc.data()?.used) {
+      inviteRef.update({ used: true, usedBy: user });
+      return true;
+    } else if (doc?.data()?.used) {
+      return false;
+    }
     return false;
+  } catch (error) {
+    throw new functions.https.HttpsError("internal", "Invite non valide");
   }
-  return false;
 }
 
 async function updateEmbyPassword(
@@ -82,7 +110,45 @@ async function updateEmbyPassword(
   return true;
 }
 
-export const generateInvite = functions.https.onRequest((request, response) => {
+const createFBAuthUser = async function (
+  displayName: string,
+  password: string,
+  email: string
+) {
+  return admin.auth().createUser({
+    email,
+    emailVerified: false,
+    password,
+    displayName,
+    disabled: false,
+    uid: displayName,
+  });
+};
+
+const createFBUser = async function (
+  name: string,
+  email: string,
+  //TODO remove any
+  embyUser: any
+) {
+  const coll = await admin.firestore().collection("users").get();
+  const isAdmin = coll.size === 0 ? "admin" : "user";
+  await admin
+    .firestore()
+    .collection("users")
+    .doc(name)
+    .set({
+      name,
+      email,
+      emby: { User: embyUser },
+      claims: { role: isAdmin },
+    });
+};
+
+export const generateInvite = functions.https.onCall((data, context) => {
+  if (!(context?.auth?.token?.role === "admin")) {
+    throw new functions.https.HttpsError("permission-denied", "Not authorized");
+  }
   try {
     admin
       .firestore()
@@ -92,42 +158,44 @@ export const generateInvite = functions.https.onRequest((request, response) => {
         used: false,
       })
       .then(() => {
-        response.send("invite generated");
+        return "invite generated";
       });
   } catch (error) {
     console.error(error);
-    response.status(500).send(error.message);
+    throw new functions.https.HttpsError("internal", error.message);
   }
 });
 
-export const registerNewUser = functions.https.onRequest(
-  async (request, response) => {
-    try {
-      const data = request.body;
-      const invite = await isInviteValid(data.inviteCode, data.name);
-      const embyUser = await embyUsernameExist(data.name);
-      if (invite && embyUser) {
-        await updateEmbyPassword(data.password, embyUser.Id);
-        response.send("user exist");
-      } else if (invite) {
-        await createUser(data.name, data.password);
-        response.send("user created");
-      } else {
-        response.status(401).send("invite code invalid");
-      }
-    } catch (error) {
-      console.error(error);
-      response.status(500).send(error.message);
+export const registerNewUser = functions.https.onCall(async (data, context) => {
+  try {
+    const coll = await admin.firestore().collection("users").get();
+    const isFirst = coll.size === 0;
+    let invite: any;
+    if (!isFirst) {
+      invite = await isInviteValid(data.inviteCode, data.name);
     }
+    const embyUser = await embyUsernameExist(data.name);
+    if ((isFirst || invite) && embyUser) {
+      await updateEmbyPassword(data.password, embyUser.Id);
+      await Promise.all([
+        createFBAuthUser(data.name, data.password, data.email),
+        createFBUser(data.name, data.email, embyUser),
+        authenticateUserWithEmby(embyUser.Id, data.password, data.name),
+      ]);
+      return "user exist";
+    } else if (isFirst || invite) {
+      const newEmbyUser = await createUser(data.name, data.password);
+      await Promise.all([
+        createFBAuthUser(data.name, data.password, data.email),
+        createFBUser(data.name, data.email, newEmbyUser),
+        authenticateUserWithEmby(newEmbyUser.Id, data.password, data.name),
+      ]);
+      return "user created";
+    } else {
+      return "invite code invalid";
+    }
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError("internal", error.message);
   }
-);
-
-export const newUser = functions.auth.user().onCreate((user) => {
-  functions.logger.info("registering new User", { structuredData: true });
-  functions.logger.info(user.toJSON(), { structuredData: true });
-  admin
-    .firestore()
-    .collection("users")
-    .doc(user.uid)
-    .set({ admin: false, email: user.email });
 });

@@ -1,13 +1,25 @@
 <template>
   <div>
     <div>
+      <label for="email">Email:</label>
       <input v-model="email" type="email" />
     </div>
     <div>
-      <input v-model="password" type="password" />
+      <label for="invite">Code d'invitation:</label>
+      <input
+        v-model="invite"
+        type="text"
+        id="invite"
+        placeholder="Code d'invitation"
+      />
     </div>
     <div>
-      <input v-model="name" type="text" placeholder="name" />
+      <label for="name">Mot de passe:</label>
+      <input v-model="password" id="password" type="password" />
+    </div>
+    <div>
+      <label for="name">Name:</label>
+      <input v-model="name" id="name" type="text" placeholder="name" />
     </div>
     <button type="submit" @click="login">Register</button>
   </div>
@@ -15,10 +27,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/firestore";
-import { db } from "@/db";
+import { auth } from "@/firebase";
+import { checkInvite, registerUser } from "@/functions";
 
 export default defineComponent({
   name: "Register",
@@ -31,40 +41,20 @@ export default defineComponent({
     };
   },
   methods: {
-    login(): void {
-      firebase
-        .auth()
-        .createUserWithEmailAndPassword(this.email, this.password)
-        .then(
-          function (user) {
-            return user;
-          },
-          function (err) {
-            alert(err.message);
-            return err;
-          }
-        )
-        .then((user) => {
-          var userUid = user.user.uid;
-          db.collection("users")
-            .doc(userUid)
-            .set({
-              email: this.email,
-              name: this.name,
-              password: this.password,
-              claims: {
-                role: "user",
-              },
-            });
-          return "ok";
-        })
-        .then(() => {
-          console.log(firebase.auth().currentUser?.getIdTokenResult());
+    async login(): Promise<void> {
+      try {
+        await registerUser({
+          email: this.email,
+          name: this.name,
+          inviteCode: this.invite,
+          password: this.password,
         });
+      } catch (error) {
+        alert(error.message);
+      }
     },
   },
 });
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

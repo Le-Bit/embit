@@ -12,10 +12,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import firebase from "firebase/app";
-import "firebase/auth";
 
-import { db } from "@/db";
+import { auth } from "@/firebase";
 
 export default defineComponent({
   name: "Login",
@@ -27,24 +25,8 @@ export default defineComponent({
     };
   },
   methods: {
-    login(): any {
-      console.log(this.email, this.password);
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(this.email, this.password)
-        .then(
-          function (user) {
-            console.log(user);
-            return user;
-          },
-          function (err) {
-            console.log(err);
-            return err;
-          }
-        )
-        .then(() => {
-          console.log(firebase.auth().currentUser?.getIdTokenResult());
-        });
+    async login(): Promise<any> {
+      await auth.signInWithEmailAndPassword(this.email, this.password);
     },
   },
 });
