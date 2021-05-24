@@ -141,7 +141,6 @@ const createFBUser = async function (
       name,
       email,
       emby: { User: embyUser },
-      claims: { role: isAdmin },
     });
   await admin.firestore().collection(`users/${name}/claims`).doc(name).set({
     role: isAdmin,
