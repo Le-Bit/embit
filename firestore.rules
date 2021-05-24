@@ -2,8 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{uid} {
+      allow read, write: if request.auth.uid == uid || request.auth.token.role == 'admin';
+    }
+    match /users/{uid}/claims/{uid} {
       allow read: if request.auth.uid == uid || request.auth.token.role == 'admin';
-      allow write: if request.auth.uid == uid || request.auth.role == 'admin';
+      allow write: if request.auth.role == 'admin';
     }
     match /invites/{uid} {
       allow read, write: if request.auth.token.role == 'admin';

@@ -143,6 +143,9 @@ const createFBUser = async function (
       emby: { User: embyUser },
       claims: { role: isAdmin },
     });
+  await admin.firestore().collection(`users/${name}/claims`).doc(name).set({
+    role: isAdmin,
+  });
 };
 
 export const generateInvite = functions.https.onCall((data, context) => {

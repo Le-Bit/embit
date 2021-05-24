@@ -5,10 +5,10 @@ import * as admin from "firebase-admin";
 
 const auth = admin.auth();
 
-const CLAIMS_FIELD: string | null = "claims";
+const CLAIMS_FIELD: string | null = null;
 
 exports.sync = functions.firestore
-  .document("users/{uid}")
+  .document("users/{uid}/claims/{uid}")
   .onWrite(async (change) => {
     const uid = change.after.id;
     try {
