@@ -1,18 +1,24 @@
 # embit
 
 ## Project setup
+Create a project in firebase
+Change the credentials in the src/firebase.ts file
 ```
 npm install
+npm intall -g firebase-tools
+firebase init
+firebase deploy
 ```
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
+npm run start
 ```
 
 ### Compiles and minifies for production
 ```
 npm run build
+cd functions && npm run build
 ```
 
 ### Run your unit tests
