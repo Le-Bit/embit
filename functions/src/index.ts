@@ -6,14 +6,7 @@ admin.initializeApp();
 
 exports.claims = require("./sync");
 
-async function createUser(name: string, password: string) {
-  const embyUser = await createEmbyUser(name);
-  await createOmbiUser();
-  await updateEmbyPassword(password, embyUser.Id);
-  return embyUser;
-}
-
-async function createOmbiUser() {
+async function ombiCreateUser() {
   await axios.post(
     functions.config().ombi.url + "/api/v1/Job/embyUserImporter/",
     {},
@@ -24,12 +17,8 @@ async function createOmbiUser() {
     }
   );
 }
-
-async function authenticateUserWithEmby(
-  id: string,
-  password: string,
-  name: string
-) {
+//TODO remove call to firestore from this function
+async function embyAuthenticateUser(id: string, password: string) {
   const result = await axios.post(
     `${
       functions.config().emby.url
@@ -38,15 +27,10 @@ async function authenticateUserWithEmby(
       Pw: password,
     }
   );
-  await admin
-    .firestore()
-    .collection("users")
-    .doc(name)
-    .update({ emby: result.data });
-  return result;
+  return result.data;
 }
 
-async function createEmbyUser(name: string) {
+async function embyCreateUser(name: string) {
   await axios.post(
     functions.config().emby.url +
       "/emby/Users/New?X-Emby-Token=" +
@@ -70,23 +54,7 @@ async function embyUsernameExist(name: string) {
   return userExist[0]?.Name === name ? userExist[0] : undefined;
 }
 
-async function isInviteValid(invite: string, user: string): Promise<boolean> {
-  try {
-    const inviteRef = admin.firestore().collection("invites").doc(invite);
-    const doc = await inviteRef.get();
-    if (doc.exists && !doc.data()?.used) {
-      inviteRef.update({ used: true, usedBy: user });
-      return true;
-    } else if (doc?.data()?.used) {
-      return false;
-    }
-    return false;
-  } catch (error) {
-    throw new functions.https.HttpsError("internal", "Invite non valide");
-  }
-}
-
-async function updateEmbyPassword(
+async function embyUpdatePassword(
   password: string,
   id: string
 ): Promise<boolean> {
@@ -110,7 +78,30 @@ async function updateEmbyPassword(
   return true;
 }
 
-const createFBAuthUser = async function (
+async function serverCreateUser(name: string, password: string) {
+  const embyUser = await embyCreateUser(name);
+  await ombiCreateUser();
+  await embyUpdatePassword(password, embyUser.Id);
+  return embyUser;
+}
+
+async function isInviteValid(invite: string, user: string): Promise<boolean> {
+  try {
+    const inviteRef = admin.firestore().collection("invites").doc(invite);
+    const doc = await inviteRef.get();
+    if (doc.exists && !doc.data()?.used) {
+      inviteRef.update({ used: true, usedBy: user });
+      return true;
+    } else if (doc?.data()?.used) {
+      return false;
+    }
+    return false;
+  } catch (error) {
+    throw new functions.https.HttpsError("internal", "Invite non valide");
+  }
+}
+
+const firebaseAuthCreateUser = async function (
   displayName: string,
   password: string,
   email: string
@@ -125,7 +116,7 @@ const createFBAuthUser = async function (
   });
 };
 
-const createFBUser = async function (
+const firestoreCreateUser = async function (
   name: string,
   email: string,
   //TODO remove any
@@ -147,6 +138,52 @@ const createFBUser = async function (
   });
 };
 
+const firestoreAddEmbyToken = async function (embyUser: any, name: string) {
+  await admin
+    .firestore()
+    .collection("users")
+    .doc(name)
+    .update({ emby: embyUser });
+};
+
+//TODO remove any, deconstruct data object
+const createUser = async function (data: any, embyUser: any) {
+  await Promise.all([
+    firebaseAuthCreateUser(data.name, data.password, data.email),
+    firestoreCreateUser(data.name, data.email, embyUser),
+    embyAuthenticateUser(embyUser.Id, data.password),
+    firestoreAddEmbyToken(embyUser, data.name),
+  ]);
+};
+
+//TODO For all Oncall Type data and context, do check on input then call function
+export const registerNewUser = functions.https.onCall(async (data, context) => {
+  try {
+    const coll = await admin.firestore().collection("users").get();
+    const isFirst = coll.size === 0;
+    //TODO remove any
+    let invite: any;
+    if (!isFirst) {
+      invite = await isInviteValid(data.inviteCode, data.name);
+    }
+    const embyUser = await embyUsernameExist(data.name);
+    if ((isFirst || invite) && embyUser) {
+      await embyUpdatePassword(data.password, embyUser.Id);
+      await createUser(data, embyUser);
+      return "user exist";
+    } else if (isFirst || invite) {
+      const newEmbyUser = await serverCreateUser(data.name, data.password);
+      await createUser(data, newEmbyUser);
+      return "user created";
+    } else {
+      return "invite code invalid";
+    }
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError("internal", error.message);
+  }
+});
+
 export const generateInvite = functions.https.onCall((data, context) => {
   if (!(context?.auth?.token?.role === "admin")) {
     throw new functions.https.HttpsError("permission-denied", "Not authorized");
@@ -162,40 +199,6 @@ export const generateInvite = functions.https.onCall((data, context) => {
       .then(() => {
         return "invite generated";
       });
-  } catch (error) {
-    console.error(error);
-    throw new functions.https.HttpsError("internal", error.message);
-  }
-});
-
-export const registerNewUser = functions.https.onCall(async (data, context) => {
-  try {
-    const coll = await admin.firestore().collection("users").get();
-    const isFirst = coll.size === 0;
-    let invite: any;
-    if (!isFirst) {
-      invite = await isInviteValid(data.inviteCode, data.name);
-    }
-    const embyUser = await embyUsernameExist(data.name);
-    if ((isFirst || invite) && embyUser) {
-      await updateEmbyPassword(data.password, embyUser.Id);
-      await Promise.all([
-        createFBAuthUser(data.name, data.password, data.email),
-        createFBUser(data.name, data.email, embyUser),
-        authenticateUserWithEmby(embyUser.Id, data.password, data.name),
-      ]);
-      return "user exist";
-    } else if (isFirst || invite) {
-      const newEmbyUser = await createUser(data.name, data.password);
-      await Promise.all([
-        createFBAuthUser(data.name, data.password, data.email),
-        createFBUser(data.name, data.email, newEmbyUser),
-        authenticateUserWithEmby(newEmbyUser.Id, data.password, data.name),
-      ]);
-      return "user created";
-    } else {
-      return "invite code invalid";
-    }
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError("internal", error.message);
