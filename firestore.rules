@@ -4,7 +4,7 @@ service cloud.firestore {
     match /users/{uid} {
       allow read, write: if request.auth.uid == uid || request.auth.token.role == 'admin';
     }
-    match /users/{uid}/claims/{uid} {
+    match /users/{uid}/claims/{uid2} {
       allow read: if request.auth.uid == uid || request.auth.token.role == 'admin';
       allow write: if request.auth.role == 'admin';
     }
