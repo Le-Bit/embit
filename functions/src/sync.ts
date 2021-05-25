@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { isDeepStrictEqual } from "util";
 
 import * as functions from "firebase-functions";

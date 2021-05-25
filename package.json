@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "start": "concurrently 'cd functions && npm run build -- --watch' 'NODE_ENV=development vue-cli-service build --watch' 'firebase emulators:start' ",
+    "test:start": "concurrently 'cd functions && npm run build -- --watch' 'NODE_ENV=development vue-cli-service build --watch' 'firebase --project=fakeproject emulators:start' ",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"

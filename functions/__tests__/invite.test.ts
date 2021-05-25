@@ -1,12 +1,10 @@
 import * as fbtest from "firebase-functions-test";
 import * as admin from "firebase-admin";
 
-import * as myFunctions from "../index";
+fbtest({ projectId: "fakeproject" });
+admin.initializeApp({ projectId: "fakeproject" });
 
-beforeEach(() => {
-  fbtest().cleanup();
-  fbtest().firestore.clearFirestoreData({ projectId: "embit-dev" });
-});
+import * as myFunctions from "../src/index";
 
 test("Cannot create invite if not an admin", () => {
   try {
@@ -33,7 +31,7 @@ test("Cannot create invite if not an admin with a user token", () => {
       .firestore()
       .collection("invites")
       .get()
-      .then((invites) => {
+      .then((invites: any) => {
         expect(invites.size).toBe(1);
       });
   } catch (error) {
@@ -43,7 +41,7 @@ test("Cannot create invite if not an admin with a user token", () => {
 
 test("Can create invite if an admin", () => {
   const wrapped = fbtest().wrap(myFunctions.generateInvite);
-  wrapped(
+  const res = wrapped(
     {},
     {
       auth: {
@@ -53,13 +51,7 @@ test("Can create invite if an admin", () => {
       },
     }
   );
-  admin
-    .firestore()
-    .collection("invites")
-    .get()
-    .then((invites) => {
-      expect(invites.size).toBe(1);
-    });
+  expect(res).toBe("invite generated");
 });
 
 //TODO register admin account

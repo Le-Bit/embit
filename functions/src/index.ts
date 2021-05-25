@@ -1,82 +1,25 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import axios from "axios";
+import { ombiCreateUser } from "./ombi";
+import {
+  embyAuthenticateUser,
+  embyCreateUser,
+  embyUsernameExist,
+  embyUpdatePassword,
+} from "./emby";
 
-admin.initializeApp();
+if (process.env.TEST_ENV == "jest") {
+  admin.initializeApp(
+    {
+      projectId: "fakeproject",
+    },
+    "fakeproject"
+  );
+} else {
+  admin.initializeApp();
+}
 
 exports.claims = require("./sync");
-
-async function ombiCreateUser() {
-  await axios.post(
-    functions.config().ombi.url + "/api/v1/Job/embyUserImporter/",
-    {},
-    {
-      headers: {
-        ApiKey: functions.config().ombi.key,
-      },
-    }
-  );
-}
-//TODO remove call to firestore from this function
-async function embyAuthenticateUser(id: string, password: string) {
-  const result = await axios.post(
-    `${
-      functions.config().emby.url
-    }/emby/Users/${id}/Authenticate?X-Emby-Client=Embit&X-Emby-Device-Name=EmbitServer&X-Emby-Device-Id=CloudFunction&X-Emby-Client-Version=NA`,
-    {
-      Pw: password,
-    }
-  );
-  return result.data;
-}
-
-async function embyCreateUser(name: string) {
-  await axios.post(
-    functions.config().emby.url +
-      "/emby/Users/New?X-Emby-Token=" +
-      functions.config().emby.key,
-    {
-      Name: name,
-    }
-  );
-  return embyUsernameExist(name);
-}
-
-async function embyUsernameExist(name: string) {
-  const response = await axios.get(
-    functions.config().emby.url +
-      "/emby/Users/Query?api_key=" +
-      functions.config().emby.key
-  );
-  const users = response.data.Items;
-  //TODO remove Any
-  const userExist = users.filter((e: any) => e.Name === name);
-  return userExist[0]?.Name === name ? userExist[0] : undefined;
-}
-
-async function embyUpdatePassword(
-  password: string,
-  id: string
-): Promise<boolean> {
-  await axios.post(
-    `${functions.config().emby.url}/emby/Users/${id}/Password?X-Emby-Token=${
-      functions.config().emby.key
-    }`,
-    {
-      resetPassword: true,
-    }
-  );
-  await axios.post(
-    `${functions.config().emby.url}/emby/Users/${id}/Password?X-Emby-Token=${
-      functions.config().emby.key
-    }`,
-    {
-      CurrentPw: "",
-      NewPw: password,
-    }
-  );
-  return true;
-}
 
 async function serverCreateUser(name: string, password: string) {
   const embyUser = await embyCreateUser(name);
@@ -97,7 +40,8 @@ async function isInviteValid(invite: string, user: string): Promise<boolean> {
     }
     return false;
   } catch (error) {
-    throw new functions.https.HttpsError("internal", "Invite non valide");
+    console.error(error.message);
+    throw new functions.https.HttpsError("internal", error.message);
   }
 }
 
@@ -152,8 +96,8 @@ const createUser = async function (data: any, embyUser: any) {
     firebaseAuthCreateUser(data.name, data.password, data.email),
     firestoreCreateUser(data.name, data.email, embyUser),
     embyAuthenticateUser(embyUser.Id, data.password),
-    firestoreAddEmbyToken(embyUser, data.name),
   ]);
+  await firestoreAddEmbyToken(embyUser, data.name);
 };
 
 //TODO For all Oncall Type data and context, do check on input then call function
@@ -189,16 +133,8 @@ export const generateInvite = functions.https.onCall((data, context) => {
     throw new functions.https.HttpsError("permission-denied", "Not authorized");
   }
   try {
-    admin
-      .firestore()
-      .collection("invites")
-      .doc()
-      .set({
-        used: false,
-      })
-      .then(() => {
-        return "invite generated";
-      });
+    admin.firestore().collection("invites").doc().set({ used: false });
+    return "invite generated";
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError("internal", error.message);
