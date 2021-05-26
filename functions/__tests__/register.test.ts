@@ -14,8 +14,8 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 import * as myFunctions from "../src/index";
 
 async function cleanAll() {
-  fbtest().firestore.clearFirestoreData({ projectId: "fakeproject" });
-  admin
+  await fbtest().firestore.clearFirestoreData({ projectId: "fakeproject" });
+  await admin
     .auth()
     .listUsers()
     .then((elem) => {
@@ -26,10 +26,17 @@ async function cleanAll() {
 }
 
 beforeAll(async () => {
-  cleanAll();
+  await cleanAll();
 });
 
 describe("account generation", () => {
+  beforeAll(async () => {
+    await cleanAll();
+  });
+  afterEach(async () => {
+    await cleanAll();
+  });
+
   it("create a admin account", async () => {
     mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
     mockedAxios.post.mockRejectedValue("Network error: Something went wrong");
@@ -56,10 +63,25 @@ describe("account generation", () => {
     expect(res).toBe("user created");
   });
 
-  it("create a admin account with invite code", async () => {
-    admin.firestore().collection("invites").doc("testInvite").set({
-      used: false,
+  it("dont create a account with a bad invite code", async () => {
+    mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
+    mockedAxios.post.mockRejectedValue("Network error: Something went wrong");
+    mockedAxios.get.mockResolvedValue({
+      data: { Items: [{ Name: "string_test1", Id: "3" }] },
     });
+    mockedAxios.post.mockResolvedValue({
+      data: { User: { Name: "string_test1", Id: "3" } },
+    });
+    const wrapped = fbtest().wrap(myFunctions.registerNewUser);
+    await wrapped(
+      {
+        name: "string_test1",
+        password: "manage007",
+        email: "test1@example.com",
+      },
+      {}
+    );
+
     mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
     mockedAxios.post.mockRejectedValue("Network error: Something went wrong");
     mockedAxios.get.mockResolvedValue({
@@ -68,56 +90,11 @@ describe("account generation", () => {
     mockedAxios.post.mockResolvedValue({
       data: { User: { Name: "string_test2", Id: "3" } },
     });
-    const wrapped = fbtest().wrap(myFunctions.registerNewUser);
     const res = await wrapped(
       {
         name: "string_test2",
         password: "manage007",
         email: "test2@example.com",
-        inviteCode: "testInvite",
-      },
-      {}
-    );
-    expect(res).toBe("user exist");
-  });
-
-  it("dont create a admin account with a bad invite code", async () => {
-    admin.firestore().collection("invites").doc("testInvite").set({
-      used: false,
-    });
-    mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
-    mockedAxios.post.mockRejectedValue("Network error: Something went wrong");
-    mockedAxios.get.mockResolvedValue({
-      data: { Items: [{ Name: "string_test3", Id: "3" }] },
-    });
-    mockedAxios.post.mockResolvedValue({
-      data: { User: { Name: "string_test3", Id: "3" } },
-    });
-    const wrapped = fbtest().wrap(myFunctions.registerNewUser);
-    await wrapped(
-      {
-        name: "string_test3",
-        password: "manage007",
-        email: "test3@example.com",
-        inviteCode: "testInvite",
-      },
-      {}
-    );
-
-    mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
-    mockedAxios.post.mockRejectedValue("Network error: Something went wrong");
-    mockedAxios.get.mockResolvedValue({
-      data: { Items: [{ Name: "string_test4", Id: "3" }] },
-    });
-    mockedAxios.post.mockResolvedValue({
-      data: { User: { Name: "string_test4", Id: "3" } },
-    });
-    const wrapped2 = fbtest().wrap(myFunctions.registerNewUser);
-    const res = await wrapped2(
-      {
-        name: "string_test4",
-        password: "manage007",
-        email: "test4@example.com",
         inviteCode: "teddstInvite",
       },
       {}
@@ -125,47 +102,88 @@ describe("account generation", () => {
     expect(res).toBe("invite code invalid");
   });
 
-  it("dont create a admin account with a used invite code", async () => {
-    admin.firestore().collection("invites").doc("testInvite2").set({
-      used: false,
-    });
+  it("dont create a account with a used invite code", async () => {
     mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
     mockedAxios.post.mockRejectedValue("Network error: Something went wrong");
     mockedAxios.get.mockResolvedValue({
-      data: { Items: [{ Name: "string_test5", Id: "3" }] },
+      data: { Items: [{ Name: "string_test1", Id: "3" }] },
     });
     mockedAxios.post.mockResolvedValue({
-      data: { User: { Name: "string_test5", Id: "3" } },
+      data: { User: { Name: "string_test1", Id: "3" } },
     });
     const wrapped = fbtest().wrap(myFunctions.registerNewUser);
     await wrapped(
       {
-        name: "string_test5",
+        name: "string_test1",
         password: "manage007",
-        email: "test5@example.com",
+        email: "test1@example.com",
+      },
+      {}
+    );
+
+    admin.firestore().collection("invites").doc("testInvite2").set({
+      used: true,
+      usedBy: "otherUser",
+    });
+
+    mockedAxios.get.mockResolvedValue({
+      data: { Items: [{ Name: "string_test2", Id: "2" }] },
+    });
+    mockedAxios.post.mockResolvedValue({
+      data: { User: { Name: "string_test2", Id: "2" } },
+    });
+    const res = await wrapped(
+      {
+        name: "string_test2",
+        password: "manage007",
+        email: "test2@example.com",
         inviteCode: "testInvite2",
       },
       {}
     );
 
+    expect(res).toBe("invite code invalid");
+  });
+
+  it("create an account with an invite code", async () => {
     mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
     mockedAxios.post.mockRejectedValue("Network error: Something went wrong");
     mockedAxios.get.mockResolvedValue({
-      data: { Items: [{ Name: "string_test6", Id: "3" }] },
+      data: { Items: [{ Name: "string_test1", Id: "3" }] },
     });
     mockedAxios.post.mockResolvedValue({
-      data: { User: { Name: "string_test6", Id: "3" } },
+      data: { User: { Name: "string_test1", Id: "3" } },
     });
-    const wrapped2 = fbtest().wrap(myFunctions.registerNewUser);
-    const res = await wrapped2(
+    const wrapped = fbtest().wrap(myFunctions.registerNewUser);
+    await wrapped(
       {
-        name: "string_test6",
+        name: "string_test1",
         password: "manage007",
-        email: "test6@example.com",
+        email: "test1@example.com",
+      },
+      {}
+    );
+
+    admin.firestore().collection("invites").doc("testInvite2").set({
+      used: false,
+    });
+
+    mockedAxios.get.mockResolvedValue({
+      data: { Items: [{ Name: "string_test2", Id: "2" }] },
+    });
+    mockedAxios.post.mockResolvedValue({
+      data: { User: { Name: "string_test2", Id: "2" } },
+    });
+    const res = await wrapped(
+      {
+        name: "string_test2",
+        password: "manage007",
+        email: "test2@example.com",
         inviteCode: "testInvite2",
       },
       {}
     );
-    expect(res).toBe("invite code invalid");
+
+    expect(res).toBe("user exist");
   });
 });

@@ -2,7 +2,7 @@
   <div>
     <div>
       <label for="email">Email:</label>
-      <input v-model="email" type="email" />
+      <input id="email" v-model="email" type="email" />
     </div>
     <div>
       <label for="invite">Code d'invitation:</label>
@@ -21,14 +21,15 @@
       <label for="name">Name:</label>
       <input v-model="name" id="name" type="text" placeholder="name" />
     </div>
-    <button type="submit" @click="login">Register</button>
+    <button type="submit" @click="register(name, email, password, invite)">
+      Register
+    </button>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { auth } from "@/firebase";
-import { checkInvite, registerUser } from "@/functions";
+import { registerUser } from "@/functions";
 
 export default defineComponent({
   name: "Register",
@@ -41,13 +42,18 @@ export default defineComponent({
     };
   },
   methods: {
-    async login(): Promise<void> {
+    async register(
+      name: string,
+      email: string,
+      password: string,
+      inviteCode: string
+    ): Promise<any> {
       try {
         await registerUser({
-          email: this.email,
-          name: this.name,
-          inviteCode: this.invite,
-          password: this.password,
+          email,
+          name,
+          inviteCode,
+          password,
         });
       } catch (error) {
         alert(error.message);

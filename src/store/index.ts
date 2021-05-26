@@ -2,7 +2,7 @@ import { createStore, Store } from "vuex";
 import { db } from "@/firebase";
 import { InjectionKey } from "vue";
 
-interface IInvite {
+export interface IInvite {
   id: string;
   used: boolean;
   usedBy?: string;

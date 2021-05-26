@@ -1,46 +1,45 @@
 <template>
-  <button @click="generate">Generate</button>
   <p>{{ this.invites.length }}</p>
   <div v-for="invite of this.invites" :key="invite.id">
     <p>{{ invite.id }}</p>
   </div>
+  <button id="generate" @click="generate">Generate</button>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { db } from "@/firebase";
 import { generateInvite } from "@/functions";
-import { mapGetters } from "vuex";
+import { IInvite } from "@/store";
 
 export default defineComponent({
   name: "Invites",
   data: function () {
     return {
-      invites: [],
+      invites: [] as IInvite[],
     };
   },
-  computed: {
-    ...mapGetters(["getInvites"]),
-  },
   created: async function () {
-    await this.$store.dispatch("fetchInvites");
-    const ref = db.collection("invites").where("used", "==", false);
+    try {
+      const ref = db.collection("invites").where("used", "==", false);
 
-    ref.onSnapshot((querySnapshot) => {
-      this.invites = [];
-      querySnapshot.forEach((doc) => {
-        const invite = { ...doc.data(), id: doc.id } as any;
-        this.invites.push(invite as never);
+      ref.onSnapshot((querySnapshot) => {
+        this.invites = [];
+        querySnapshot.forEach((doc) => {
+          const invite = { ...doc.data(), id: doc.id } as IInvite;
+          this.invites.push(invite as never);
+        });
       });
-    });
+    } catch (error) {
+      console.error(error.message);
+    }
   },
   methods: {
-    generate: async function () {
-      console.log("invite generation");
+    generate: async function (): Promise<any> {
       try {
-        await generateInvite();
+        return await generateInvite();
       } catch (error) {
-        alert(error.message);
+        return error;
       }
     },
   },

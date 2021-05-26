@@ -6,7 +6,7 @@
     <div>
       <input v-model="password" type="password" />
     </div>
-    <button type="submit" @click="login">Login</button>
+    <button type="submit" @click="login(email, password)">Login</button>
   </div>
 </template>
 
@@ -20,13 +20,16 @@ export default defineComponent({
   data: function () {
     return {
       email: "",
-      name: "",
       password: "",
     };
   },
   methods: {
-    async login(): Promise<any> {
-      await auth.signInWithEmailAndPassword(this.email, this.password);
+    async login(email: string, password: string): Promise<any> {
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
 });
