@@ -1,5 +1,5 @@
 import { createStore, Store } from "vuex";
-import { auth } from "@/firebase";
+import { auth, db } from "@/firebase";
 import { registerUser } from "../functions";
 import { InjectionKey } from "vue";
 
@@ -26,14 +26,6 @@ const initialState = (): State => {
 };
 export const store = createStore<State>({
   state: initialState(),
-  mutations: {
-    setUser(state, payload) {
-      state.user = payload;
-    },
-    setError(state, payload) {
-      state.error = payload;
-    },
-  },
   getters: {
     getUser(state) {
       return state.user;
@@ -46,6 +38,20 @@ export const store = createStore<State>({
     },
     getInvites: function (state) {
       return state.invites;
+    },
+  },
+  mutations: {
+    setUser(state, payload) {
+      state.user = payload;
+    },
+    setError(state, payload) {
+      state.error = payload;
+    },
+    setInvite(state, payload) {
+      state.invites = payload;
+    },
+    pushInvite(state, payload) {
+      state.invites.push(payload);
     },
   },
   actions: {
@@ -78,7 +84,7 @@ export const store = createStore<State>({
         }
       });
     },
-    signUpAction({ commit, dispatch }, payload) {
+    signUpAction({ commit }, payload) {
       registerUser({
         email: payload.email,
         password: payload.password,
@@ -91,6 +97,17 @@ export const store = createStore<State>({
         .catch((error) => {
           commit("setError", error);
         });
+    },
+    initInvites({ commit }) {
+      const ref = db.collection("invites").where("used", "==", false);
+
+      ref.onSnapshot((querySnapshot) => {
+        commit("setInvite", []);
+        querySnapshot.forEach((doc) => {
+          const invite = { ...doc.data(), id: doc.id } as IInvite;
+          commit("pushInvite", invite);
+        });
+      });
     },
   },
   modules: {},

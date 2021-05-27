@@ -1,6 +1,6 @@
 <template>
-  <p>{{ this.invites.length }}</p>
-  <div v-for="invite of this.invites" :key="invite.id">
+  <p>{{ this.getInvites.length }}</p>
+  <div v-for="invite of this.getInvites" :key="invite.id">
     <p>{{ invite.id }}</p>
   </div>
   <button id="generate" @click="generate">Generate</button>
@@ -8,9 +8,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { db } from "@/firebase";
 import { generateInvite } from "@/functions";
 import { IInvite } from "@/store";
+import { mapActions, mapGetters } from "vuex";
 
 export default defineComponent({
   name: "Invites",
@@ -19,22 +19,14 @@ export default defineComponent({
       invites: [] as IInvite[],
     };
   },
-  created: async function () {
-    try {
-      const ref = db.collection("invites").where("used", "==", false);
-
-      ref.onSnapshot((querySnapshot) => {
-        this.invites = [];
-        querySnapshot.forEach((doc) => {
-          const invite = { ...doc.data(), id: doc.id } as IInvite;
-          this.invites.push(invite as never);
-        });
-      });
-    } catch (error) {
-      console.error(error.message);
-    }
+  computed: {
+    ...mapGetters(["getInvites"]),
+  },
+  mounted: function () {
+    this.initInvites();
   },
   methods: {
+    ...mapActions(["initInvites"]),
     generate: async function (): Promise<any> {
       try {
         return await generateInvite();
