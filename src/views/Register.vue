@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { registerUser } from "@/functions";
+import { mapActions } from "vuex";
 
 export default defineComponent({
   name: "Register",
@@ -42,22 +42,14 @@ export default defineComponent({
     };
   },
   methods: {
+    ...mapActions(["signUpAction", "signInAction"]),
     async register(
       name: string,
       email: string,
       password: string,
       inviteCode: string
     ): Promise<any> {
-      try {
-        await registerUser({
-          email,
-          name,
-          inviteCode,
-          password,
-        });
-      } catch (error) {
-        alert(error.message);
-      }
+      this.signUpAction({ name, email, inviteCode, password });
     },
   },
 });

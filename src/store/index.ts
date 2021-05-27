@@ -1,5 +1,6 @@
 import { createStore, Store } from "vuex";
-import { db } from "@/firebase";
+import { auth } from "@/firebase";
+import { registerUser } from "../functions";
 import { InjectionKey } from "vue";
 
 export interface IInvite {
@@ -10,37 +11,86 @@ export interface IInvite {
 
 export interface State {
   invites: IInvite[];
+  user: any;
+  error: any;
 }
 
 export const key: InjectionKey<Store<State>> = Symbol();
 
-export const store = createStore<State>({
-  state: {
+const initialState = (): State => {
+  return {
     invites: [],
-  },
+    user: null,
+    error: null,
+  };
+};
+export const store = createStore<State>({
+  state: initialState(),
   mutations: {
-    getInvitescmt(state, payload) {
-      state.invites = [];
-      state.invites = payload;
+    setUser(state, payload) {
+      state.user = payload;
+    },
+    setError(state, payload) {
+      state.error = payload;
     },
   },
   getters: {
+    getUser(state) {
+      return state.user;
+    },
+    getError(state) {
+      return state.error;
+    },
+    isUserAuth(state) {
+      return !!state.user;
+    },
     getInvites: function (state) {
       return state.invites;
     },
   },
   actions: {
-    fetchInvites(context) {
-      const invites: IInvite[] = [];
-      const ref = db.collection("invites");
-
-      ref.onSnapshot((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          const invite = { ...doc.data(), id: doc.id } as any;
-          invites.push(invite as never);
-          context.commit("getInvitescmt");
+    signInAction({ commit }, payload) {
+      auth
+        .signInWithEmailAndPassword(payload.email, payload.password)
+        .then((response) => {
+          commit("setUser", response);
+        })
+        .catch((error) => {
+          commit("setError", error);
         });
+    },
+    signOutAction({ commit }) {
+      auth
+        .signOut()
+        .then(() => {
+          commit("setUser", null);
+        })
+        .catch((error) => {
+          commit("setError", error);
+        });
+    },
+    authAction({ commit }) {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          commit("setUser", user);
+        } else {
+          commit("setUser", null);
+        }
       });
+    },
+    signUpAction({ commit, dispatch }, payload) {
+      registerUser({
+        email: payload.email,
+        password: payload.password,
+        inviteCode: payload.inviteCode,
+        name: payload.name,
+      })
+        .then((response) => {
+          commit("setUser", response);
+        })
+        .catch((error) => {
+          commit("setError", error);
+        });
     },
   },
   modules: {},

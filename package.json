@@ -32,6 +32,7 @@
     "@vue/cli-plugin-vuex": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
+    "@vue/devtools": "^5.3.4",
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^2.0.0-0",
@@ -86,7 +87,9 @@
     "transform": {
       "^.+\\.vue$": "vue-jest"
     },
-    "modulePathIgnorePatterns": ["<rootDir>/functions/"]
+    "modulePathIgnorePatterns": [
+      "<rootDir>/functions/"
+    ]
   },
   "gitHooks": {
     "pre-commit": "lint-staged"

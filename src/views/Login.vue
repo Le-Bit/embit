@@ -7,13 +7,14 @@
       <input v-model="password" type="password" />
     </div>
     <button type="submit" @click="login(email, password)">Login</button>
+    <button type="submit" @click="logout()">Login</button>
   </div>
+  <p>{{ this.getUser }}</p>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
-import { auth } from "@/firebase";
+import { mapActions, mapGetters } from "vuex";
 
 export default defineComponent({
   name: "Login",
@@ -23,13 +24,16 @@ export default defineComponent({
       password: "",
     };
   },
+  computed: {
+    ...mapGetters(["getUser", "isUserAuth"]),
+  },
   methods: {
-    async login(email: string, password: string): Promise<any> {
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-      } catch (error) {
-        console.error(error);
-      }
+    ...mapActions(["signOutAction", "signInAction"]),
+    login(email: string, password: string) {
+      this.signInAction({ email, password });
+    },
+    logout() {
+      this.signOutAction();
     },
   },
 });
