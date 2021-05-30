@@ -48,7 +48,7 @@ export default defineComponent({
       email: string,
       password: string,
       inviteCode: string
-    ): Promise<any> {
+    ) {
       this.signUpAction({ name, email, inviteCode, password });
     },
   },

@@ -7,9 +7,13 @@
       <input v-model="password" type="password" />
     </div>
     <button type="submit" @click="login(email, password)">Login</button>
-    <button type="submit" @click="logout()">Login</button>
+    <button type="submit" @click="logout()">Logout</button>
   </div>
-  <p>{{ this.getUser }}</p>
+  <div v-if="isUserAuth">
+    <p>coucou</p>
+    <p>{{ this.getUser }}</p>
+    <p>{{ this.isAdmin }}</p>
+  </div>
 </template>
 
 <script lang="ts">
@@ -25,10 +29,13 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(["getUser", "isUserAuth"]),
+    ...mapGetters(["getUser", "isUserAuth", "isAdmin"]),
+  },
+  mounted: function () {
+    this.authAction();
   },
   methods: {
-    ...mapActions(["signOutAction", "signInAction"]),
+    ...mapActions(["signOutAction", "signInAction", "authAction"]),
     login(email: string, password: string) {
       this.signInAction({ email, password });
     },

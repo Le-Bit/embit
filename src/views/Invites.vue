@@ -1,9 +1,9 @@
 <template>
+  <button id="generate" @click="generate">Generate</button>
   <p>{{ this.getInvites.length }}</p>
   <div v-for="invite of this.getInvites" :key="invite.id">
     <p>{{ invite.id }}</p>
   </div>
-  <button id="generate" @click="generate">Generate</button>
 </template>
 
 <script lang="ts">
@@ -20,18 +20,20 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(["getInvites"]),
+    ...mapGetters(["getInvites", "isAdmin"]),
   },
   mounted: function () {
-    this.initInvites();
+    if (this.isAdmin) {
+      this.initInvites();
+    }
   },
   methods: {
     ...mapActions(["initInvites"]),
-    generate: async function (): Promise<any> {
+    generate: function () {
       try {
-        return await generateInvite();
+        generateInvite();
       } catch (error) {
-        return error;
+        console.error(error);
       }
     },
   },

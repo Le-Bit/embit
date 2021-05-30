@@ -12,6 +12,7 @@ export interface IInvite {
 export interface State {
   invites: IInvite[];
   user: any;
+  claims: any;
   error: any;
 }
 
@@ -21,6 +22,7 @@ const initialState = (): State => {
   return {
     invites: [],
     user: null,
+    claims: null,
     error: null,
   };
 };
@@ -36,6 +38,9 @@ export const store = createStore<State>({
     isUserAuth(state) {
       return !!state.user;
     },
+    isAdmin(state) {
+      return state.claims?.role === "admin";
+    },
     getInvites: function (state) {
       return state.invites;
     },
@@ -50,53 +55,50 @@ export const store = createStore<State>({
     setInvite(state, payload) {
       state.invites = payload;
     },
+    setClaims(state, payload) {
+      state.claims = payload;
+    },
     pushInvite(state, payload) {
       state.invites.push(payload);
     },
   },
   actions: {
     signInAction({ commit }, payload) {
+      const { email, password } = payload;
       auth
-        .signInWithEmailAndPassword(payload.email, payload.password)
-        .then((response) => {
-          commit("setUser", response);
-        })
-        .catch((error) => {
-          commit("setError", error);
-        });
+        .signInWithEmailAndPassword(email, password)
+        .then((response) => commit("setUser", response))
+        .catch((error) => commit("setError", error));
     },
     signOutAction({ commit }) {
       auth
         .signOut()
-        .then(() => {
-          commit("setUser", null);
-        })
-        .catch((error) => {
-          commit("setError", error);
-        });
+        .then(() => commit("setUser", null))
+        .catch((error) => commit("setError", error));
     },
     authAction({ commit }) {
       auth.onAuthStateChanged((user) => {
         if (user) {
           commit("setUser", user);
+          auth.currentUser
+            ?.getIdTokenResult()
+            .then((idTokenResult) => commit("setClaims", idTokenResult.claims))
+            .catch((error) => commit("setError", error));
         } else {
           commit("setUser", null);
+          commit("setClaims", null);
         }
       });
     },
     signUpAction({ commit }, payload) {
-      registerUser({
-        email: payload.email,
-        password: payload.password,
-        inviteCode: payload.inviteCode,
-        name: payload.name,
-      })
-        .then((response) => {
-          commit("setUser", response);
+      const { email, password, inviteCode, name } = payload;
+      registerUser({ email, password, inviteCode, name })
+        .then(() => {
+          auth
+            .signInWithEmailAndPassword(payload.email, payload.password)
+            .then((response) => commit("setUser", response));
         })
-        .catch((error) => {
-          commit("setError", error);
-        });
+        .catch((error) => commit("setError", error));
     },
     initInvites({ commit }) {
       const ref = db.collection("invites").where("used", "==", false);
