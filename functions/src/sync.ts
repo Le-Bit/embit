@@ -9,7 +9,7 @@ const auth = admin.auth();
 const CLAIMS_FIELD: string | null = null;
 
 exports.sync = functions.firestore
-  .document("users/{uid}/claims/{uid}")
+  .document("users/{uid}/claims/{uid2}")
   .onWrite(async (change) => {
     const uid = change.after.id;
     try {

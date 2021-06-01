@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import { store } from "@/store";
+import { useStore } from "@/store/pinia";
 
 const routes: Array<RouteRecordRaw> = [
   { path: "/", name: "Home", component: () => import("../views/Home.vue") },
@@ -17,7 +17,10 @@ const routes: Array<RouteRecordRaw> = [
     path: "/admin/invites",
     name: "Invites",
     component: () => import("../views/Invites.vue"),
-    beforeEnter: (to, from) => store.getters.isAdmin,
+    beforeEnter: (to, from) => {
+      const store = useStore();
+      return store.isAdmin;
+    },
   },
 ];
 

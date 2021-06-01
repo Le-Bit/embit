@@ -17,7 +17,7 @@ export const db = Firebase.firestore();
 export const auth = firebase.auth();
 export const functions = firebase.functions();
 
-if (process.env.NODE_ENV === "development" || process.env.TEST_ENV === "jest") {
+if (process.env.NODE_ENV === "development") {
   auth.useEmulator("http://localhost:9099");
   db.useEmulator("localhost", 8080);
   functions.useEmulator("localhost", 5001);

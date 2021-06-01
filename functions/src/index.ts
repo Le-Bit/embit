@@ -8,13 +8,10 @@ import {
   embyUpdatePassword,
 } from "./emby";
 
-if (process.env.TEST_ENV == "jest") {
-  admin.initializeApp(
-    {
-      projectId: "fakeproject",
-    },
-    "fakeproject"
-  );
+if (process.env.NODE_ENV == "development") {
+  admin.initializeApp({
+    projectId: "embit-dev",
+  });
 } else {
   admin.initializeApp();
 }

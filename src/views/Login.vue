@@ -18,7 +18,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters } from "pinia";
+import { useStore } from "@/store/pinia";
 
 export default defineComponent({
   name: "Login",
@@ -29,15 +30,15 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(["getUser", "isUserAuth", "isAdmin"]),
+    ...mapGetters(useStore, ["getUser", "isUserAuth", "isAdmin"]),
   },
   mounted: function () {
     this.authAction();
   },
   methods: {
-    ...mapActions(["signOutAction", "signInAction", "authAction"]),
+    ...mapActions(useStore, ["signOutAction", "signInAction", "authAction"]),
     login(email: string, password: string) {
-      this.signInAction({ email, password });
+      this.signInAction(email, password);
     },
     logout() {
       this.signOutAction();

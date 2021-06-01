@@ -10,7 +10,8 @@
 import { defineComponent } from "vue";
 import { generateInvite } from "@/functions";
 import { IInvite } from "@/store";
-import { mapActions, mapGetters } from "vuex";
+import { useStore } from "@/store/pinia";
+import { mapActions, mapGetters } from "pinia";
 
 export default defineComponent({
   name: "Invites",
@@ -20,7 +21,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(["getInvites", "isAdmin"]),
+    ...mapGetters(useStore, ["getInvites", "isAdmin"]),
   },
   mounted: function () {
     if (this.isAdmin) {
@@ -28,7 +29,7 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapActions(["initInvites"]),
+    ...mapActions(useStore, ["initInvites"]),
     generate: function () {
       try {
         generateInvite();

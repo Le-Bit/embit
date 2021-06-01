@@ -29,7 +29,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
+import { mapActions } from "pinia";
+import { useStore } from "@/store/pinia";
 
 export default defineComponent({
   name: "Register",
@@ -42,14 +43,14 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(["signUpAction", "signInAction"]),
+    ...mapActions(useStore, ["signUpAction", "signInAction"]),
     async register(
       name: string,
       email: string,
       password: string,
       inviteCode: string
     ) {
-      this.signUpAction({ name, email, inviteCode, password });
+      this.signUpAction(email, password, inviteCode, name);
     },
   },
 });
