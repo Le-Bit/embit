@@ -1,5 +1,5 @@
 <template>
-  <button id="generate" @click="generate">Generate</button>
+  <button id="generate" @click="generateInvite">Generate</button>
   <p>{{ this.getInvites.length }}</p>
   <div v-for="invite of this.getInvites" :key="invite.id">
     <p>{{ invite.id }}</p>
@@ -8,9 +8,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { generateInvite } from "@/functions";
-import { IInvite } from "@/store";
-import { useStore } from "@/store/pinia";
+import { useInvitesStore, IInvite } from "@/store/invites";
 import { mapActions, mapGetters } from "pinia";
 
 export default defineComponent({
@@ -21,22 +19,13 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(useStore, ["getInvites", "isAdmin"]),
+    ...mapGetters(useInvitesStore, ["getInvites"]),
   },
   mounted: function () {
-    if (this.isAdmin) {
-      this.initInvites();
-    }
+    this.initInvites();
   },
   methods: {
-    ...mapActions(useStore, ["initInvites"]),
-    generate: function () {
-      try {
-        generateInvite();
-      } catch (error) {
-        console.error(error);
-      }
-    },
+    ...mapActions(useInvitesStore, ["initInvites", "generateInvite"]),
   },
 });
 </script>

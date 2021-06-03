@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import { useStore } from "@/store/pinia";
+import { useAuthStore } from "@/store/auth";
 
 const routes: Array<RouteRecordRaw> = [
   { path: "/", name: "Home", component: () => import("../views/Home.vue") },
@@ -18,7 +18,7 @@ const routes: Array<RouteRecordRaw> = [
     name: "Invites",
     component: () => import("../views/Invites.vue"),
     beforeEnter: (to, from) => {
-      const store = useStore();
+      const store = useAuthStore();
       return store.isAdmin;
     },
   },

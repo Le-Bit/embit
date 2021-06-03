@@ -1,10 +1,23 @@
 <template>
-  <div>
-    <div>
-      <label for="email">Email:</label>
-      <input id="email" v-model="email" type="email" />
+  <form>
+    <div class="form__elem">
+      <label for="name">Name:</label>
+      <input v-model="name" id="name" type="text" placeholder="Pseudo" />
     </div>
-    <div>
+    <div class="form__elem">
+      <label for="email">Email:</label>
+      <input id="email" v-model="email" type="email" placeholder="email" />
+    </div>
+    <div class="form__elem">
+      <label for="name">Mot de passe:</label>
+      <input
+        v-model="password"
+        id="password"
+        type="password"
+        placeholder="password"
+      />
+    </div>
+    <div class="form__elem">
       <label for="invite">Code d'invitation:</label>
       <input
         v-model="invite"
@@ -13,24 +26,16 @@
         placeholder="Code d'invitation"
       />
     </div>
-    <div>
-      <label for="name">Mot de passe:</label>
-      <input v-model="password" id="password" type="password" />
-    </div>
-    <div>
-      <label for="name">Name:</label>
-      <input v-model="name" id="name" type="text" placeholder="name" />
-    </div>
     <button type="submit" @click="register(name, email, password, invite)">
       Register
     </button>
-  </div>
+  </form>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions } from "pinia";
-import { useStore } from "@/store/pinia";
+import { useAuthStore } from "@/store/auth";
 
 export default defineComponent({
   name: "Register",
@@ -43,7 +48,7 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(useStore, ["signUpAction", "signInAction"]),
+    ...mapActions(useAuthStore, ["signUpAction", "signInAction"]),
     async register(
       name: string,
       email: string,
@@ -56,4 +61,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss"></style>
+<style scoped lang="scss"></style>

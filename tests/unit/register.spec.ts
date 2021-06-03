@@ -1,6 +1,5 @@
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import Register from "@/views/Register.vue";
-import { createStore } from "vuex";
 
 describe("Register.vue", () => {
   it("renders props.msg when passed", async () => {

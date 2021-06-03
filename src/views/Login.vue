@@ -6,8 +6,8 @@
     <div>
       <input v-model="password" type="password" />
     </div>
-    <button type="submit" @click="login(email, password)">Login</button>
-    <button type="submit" @click="logout()">Logout</button>
+    <button type="submit" @click="signInAction(email, password)">Login</button>
+    <button type="submit" @click="signOutAction()">Logout</button>
   </div>
   <div v-if="isUserAuth">
     <p>coucou</p>
@@ -19,7 +19,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "pinia";
-import { useStore } from "@/store/pinia";
+import { useAuthStore } from "@/store/auth";
 
 export default defineComponent({
   name: "Login",
@@ -30,19 +30,10 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(useStore, ["getUser", "isUserAuth", "isAdmin"]),
-  },
-  mounted: function () {
-    this.authAction();
+    ...mapGetters(useAuthStore, ["getUser", "isUserAuth", "isAdmin"]),
   },
   methods: {
-    ...mapActions(useStore, ["signOutAction", "signInAction", "authAction"]),
-    login(email: string, password: string) {
-      this.signInAction(email, password);
-    },
-    logout() {
-      this.signOutAction();
-    },
+    ...mapActions(useAuthStore, ["signOutAction", "signInAction"]),
   },
 });
 </script>

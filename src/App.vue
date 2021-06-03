@@ -1,11 +1,26 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/login">Login</router-link> |
-    <router-link to="/register">Register</router-link> |
-    <router-link to="/admin/invites">Invites</router-link>
-  </div>
+  <the-nav-bar />
   <router-view />
 </template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+import { mapActions } from "pinia";
+import { useAuthStore } from "@/store/auth";
+import TheNavBar from "@/components/theNavbar.vue";
+
+export default defineComponent({
+  name: "App",
+  components: {
+    TheNavBar,
+  },
+  mounted: function () {
+    this.authAction();
+  },
+  methods: {
+    ...mapActions(useAuthStore, ["authAction"]),
+  },
+});
+</script>
 
 <style lang="scss"></style>

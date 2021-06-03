@@ -1,25 +1,20 @@
-import { auth, db } from "@/firebase";
-import { registerUser } from "../functions";
+import { Auth } from "@/firebase";
+import firebase from "firebase/app";
+import { functions } from "@/firebase";
 import { defineStore } from "pinia";
 
-export interface IInvite {
-  id: string;
-  used: boolean;
-  usedBy?: string;
-}
+const registerUser = functions.httpsCallable("registerNewUser");
 
 export interface State {
-  invites: IInvite[];
-  user: any;
-  claims: any;
+  user: firebase.User | null;
+  claims: firebase.auth.IdTokenResult | null;
   error: any;
 }
 
-export const useStore = defineStore({
-  id: "store",
+export const useAuthStore = defineStore({
+  id: "auth",
   state(): State {
     return {
-      invites: [],
       user: null,
       claims: null,
       error: null,
@@ -36,32 +31,32 @@ export const useStore = defineStore({
       return !!state.user;
     },
     isAdmin(state) {
-      return state.claims?.role === "admin";
-    },
-    getInvites: function (state) {
-      return state.invites;
+      return state.claims?.claims?.role === "admin";
     },
   },
   actions: {
     signInAction(email: string, password: string) {
-      auth
-        .signInWithEmailAndPassword(email, password)
-        .then((response) => (this.user = response))
+      Auth.signInWithEmailAndPassword(email, password)
+        .then(() => this.authAction())
         .catch((error) => (this.error = error));
     },
     signOutAction() {
-      auth
-        .signOut()
+      Auth.signOut()
         .then(() => (this.user = null))
         .catch((error) => (this.error = error));
     },
     authAction() {
-      auth.onAuthStateChanged((user) => {
+      console.log("authAction called");
+      Auth.onAuthStateChanged((user) => {
+        console.log("auth state changed");
+        console.log(user?.getIdTokenResult());
+        console.log(this.isAdmin);
         if (user) {
           this.user = user;
-          auth.currentUser
+          Auth.currentUser
             ?.getIdTokenResult()
-            .then((idTokenResult) => (this.claims = idTokenResult.claims))
+            .then((idTokenResult) => (this.claims = idTokenResult))
+            .then(() => console.log(this.isAdmin))
             .catch((error) => (this.error = error));
         } else {
           this.user = null;
@@ -77,22 +72,11 @@ export const useStore = defineStore({
     ) {
       registerUser({ email, password, inviteCode, name })
         .then(() => {
-          auth
-            .signInWithEmailAndPassword(email, password)
-            .then((response) => (this.user = response));
+          Auth.signInWithEmailAndPassword(email, password).then(() =>
+            this.authAction()
+          );
         })
         .catch((error) => (this.error = error));
-    },
-    initInvites() {
-      const ref = db.collection("invites").where("used", "==", false);
-
-      ref.onSnapshot((querySnapshot) => {
-        this.invites = [];
-        querySnapshot.forEach((doc) => {
-          const invite = { ...doc.data(), id: doc.id } as IInvite;
-          this.invites.push(invite);
-        });
-      });
     },
   },
 });
