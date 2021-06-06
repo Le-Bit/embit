@@ -23,4 +23,13 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0px;
+  background: linear-gradient(#e66465, #9198e5);
+  height: 100vh;
+}
+</style>
