@@ -1,10 +1,10 @@
 <template>
   <header id="nav">
     <nav>
-      <router-link class="router-link" to="/">Home</router-link>
-      <router-link class="router-link" to="/admin/invites">Invites</router-link>
-      <router-link class="router-link" to="/register">Register</router-link>
-      <router-link class="router-link" to="/login">
+      <router-link to="/admin/invites">Invites</router-link>
+      <router-link to="/">Home</router-link>
+      <router-link to="/register">Register</router-link>
+      <router-link to="/login">
         <div class="login-button">Login</div>
       </router-link>
     </nav>
@@ -49,12 +49,13 @@ header {
     position: relative;
     width: max-content;
   }
+
   a::after {
     content: "";
     background: pink;
     position: absolute;
     width: 100%;
-    left: 0px;
+    left: 4px;
     bottom: 0px;
     height: 4px;
     transform: scaleX(0);
