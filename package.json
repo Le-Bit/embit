@@ -24,7 +24,7 @@
     "vite": "^2.3.7",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
-    "vue-tsc": "^0.1.7"
+    "vue-tsc": "^0.0.26"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.14.4",
@@ -32,7 +32,6 @@
     "@typescript-eslint/eslint-plugin": "^4.26.1",
     "@typescript-eslint/parser": "^4.26.1",
     "@vue/compiler-sfc": "^3.1.1",
-    "@vue/devtools": "^5.3.4",
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^2.0.0-0",
@@ -88,7 +87,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,vue,ts,tsx}": [
-      "vue-cli-service lint",
+      "npm run lint:fix",
       "git add"
     ]
   }
