@@ -15,7 +15,7 @@ module.exports = {
     },
     {
       displayName: "vue",
-      preset: "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
+      presets: ['@babel/preset-env'],
       transform: {
         "^.+\\.vue$": "vue-jest",
       },

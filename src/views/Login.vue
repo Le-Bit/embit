@@ -11,8 +11,8 @@
   </div>
   <div v-if="isUserAuth">
     <p>coucou</p>
-    <p>{{ this.getUser }}</p>
-    <p>{{ this.isAdmin }}</p>
+    <p>{{ getUser }}</p>
+    <p>{{ isAdmin }}</p>
   </div>
 </template>
 
