@@ -1,6 +1,6 @@
 import { Auth, functions } from "../firebase";
 import firebase from "firebase/app";
-import { useToastStore } from "@/store/toast";
+import { useToastStore } from "./toast";
 import { defineStore } from "pinia";
 
 const registerUser = functions.httpsCallable("registerNewUser");
