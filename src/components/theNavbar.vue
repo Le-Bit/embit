@@ -1,9 +1,9 @@
 <template>
   <header id="nav">
     <nav>
-      <router-link to="/admin/invites">Invites</router-link>
-      <router-link to="/">Home</router-link>
-      <router-link to="/register">Register</router-link>
+      <router-link class="nav-link" to="/admin/invites">Invites</router-link>
+      <router-link class="nav-link" to="/">Home</router-link>
+      <router-link class="nav-link" to="/register">Register</router-link>
       <router-link to="/login">
         <div class="login-button">Login</div>
       </router-link>
@@ -34,7 +34,7 @@ header {
 
   .login-button {
     display: inline-block;
-    background-color: blue;
+    background-color: hsl(240, 62%, 73%);
     margin: 8px;
     padding: 4px;
     border-radius: 4px;
@@ -43,18 +43,18 @@ header {
     margin-right: 16px;
   }
 
-  a {
+  .nav-link {
     padding: 4px 4px;
     text-decoration: none;
     position: relative;
     width: max-content;
   }
 
-  a::after {
+  .nav-link::after {
     content: "";
-    background: pink;
+    background: hsl(315, 62%, 73%);
     position: absolute;
-    width: 100%;
+    width: calc(100% - 8px);
     left: 4px;
     bottom: 0px;
     height: 4px;

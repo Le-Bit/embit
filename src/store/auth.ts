@@ -1,5 +1,6 @@
 import { Auth, functions } from "../firebase";
 import firebase from "firebase/app";
+import { useToastStore } from "@/store/toast";
 import { defineStore } from "pinia";
 
 const registerUser = functions.httpsCallable("registerNewUser");
@@ -7,7 +8,7 @@ const registerUser = functions.httpsCallable("registerNewUser");
 export interface State {
   user: firebase.User | null;
   claims: firebase.auth.IdTokenResult | null;
-  error: any;
+  toast: any;
 }
 
 export const useAuthStore = defineStore({
@@ -16,7 +17,7 @@ export const useAuthStore = defineStore({
     return {
       user: null,
       claims: null,
-      error: null,
+      toast: useToastStore(),
     };
   },
   getters: {
@@ -37,12 +38,12 @@ export const useAuthStore = defineStore({
     signInAction(email: string, password: string) {
       Auth.signInWithEmailAndPassword(email, password)
         .then(() => this.authAction())
-        .catch((error) => (this.error = error));
+        .catch((error) => this.toast.setError(error));
     },
     signOutAction() {
       Auth.signOut()
         .then(() => (this.user = null))
-        .catch((error) => (this.error = error));
+        .catch((error) => this.toast.setError(error));
     },
     authAction() {
       Auth.onAuthStateChanged((user) => {
@@ -51,7 +52,7 @@ export const useAuthStore = defineStore({
           Auth.currentUser
             ?.getIdTokenResult()
             .then((idTokenResult) => (this.claims = idTokenResult))
-            .catch((error) => (this.error = error));
+            .catch((error) => this.toast.setError(error));
         } else {
           this.user = null;
           this.claims = null;
@@ -70,7 +71,7 @@ export const useAuthStore = defineStore({
             this.authAction()
           );
         })
-        .catch((error) => (this.error = error));
+        .catch((error) => this.toast.setError(error));
     },
   },
 });
