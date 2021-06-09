@@ -34,8 +34,8 @@ export default defineComponent({
   cursor: pointer;
   padding: 0.5em;
   border-radius: 10px;
-  background-color: red;
-  color: white;
+  background-color: hsl(120, 62%, 73%);
+  color: hsl(0, 62%, 10%);
 }
 .toast-enter-active {
   animation: wobble 0.5s ease;

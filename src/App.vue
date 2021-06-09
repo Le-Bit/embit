@@ -40,7 +40,7 @@ export default defineComponent({
 }
 body {
   margin: 0px;
-  background: linear-gradient(#e66465, #9198e5);
+  background: linear-gradient(hsl(315, 62%, 73%), hsl(270, 62%, 73%));
   height: 100vh;
 }
 </style>
