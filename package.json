@@ -8,7 +8,7 @@
     "test:start": "concurrently 'cd functions && NODE_ENV=development npm run build -- --watch' 'NODE_ENV=development vue-cli-service build --watch' 'firebase --project=embit-dev emulators:start' ",
     "build": "vue-cli-service build",
     "build:back": "cd functions && tsc",
-    "test:unit": "NODE_ENV=development vue-cli-service test:unit",
+    "test:unit": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

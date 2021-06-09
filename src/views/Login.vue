@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useAuthStore } from "@/store/auth";
 
 export default defineComponent({
@@ -30,7 +30,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(useAuthStore, ["getUser", "isUserAuth", "isAdmin"]),
+    ...mapState(useAuthStore, ["getUser", "isUserAuth", "isAdmin"]),
   },
   methods: {
     ...mapActions(useAuthStore, ["signOutAction", "signInAction"]),

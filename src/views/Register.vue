@@ -26,7 +26,7 @@
         placeholder="Code d'invitation"
       />
     </div>
-    <button type="submit" @click="register(name, email, password, invite)">
+    <button type="submit" @click="signUpAction(name, email, password, invite)">
       Register
     </button>
   </form>
@@ -48,15 +48,7 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(useAuthStore, ["signUpAction", "signInAction"]),
-    async register(
-      name: string,
-      email: string,
-      password: string,
-      inviteCode: string
-    ) {
-      this.signUpAction(email, password, inviteCode, name);
-    },
+    ...mapActions(useAuthStore, ["signUpAction"]),
   },
 });
 </script>

@@ -1,17 +1,19 @@
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import Register from "@/views/Register.vue";
+import { createTestPinia } from "../pinia-helper";
 
 describe("Register.vue", () => {
   it("renders props.msg when passed", async () => {
+    const pinia = createTestPinia();
     const email = "t@l.c";
     const password = "manage2020";
     const name = "name";
     const inviteCode = "invite";
 
     const mockRegister = jest
-      .spyOn(Register.methods as any, "register")
+      .spyOn(Register.methods as any, "signUpAction")
       .mockImplementation(() => true);
-    const wrapper = shallowMount(Register);
+    const wrapper = shallowMount(Register, { global: { plugins: [pinia] } });
 
     const emailInput = wrapper.find("#email");
     const nameInput = wrapper.find("#name");
@@ -27,7 +29,11 @@ describe("Register.vue", () => {
 
     await flushPromises();
     expect(mockRegister).toHaveBeenCalled();
-
-    expect(1).toBe(1);
+    expect(mockRegister).toHaveBeenCalledWith(
+      name,
+      email,
+      password,
+      inviteCode
+    );
   });
 });

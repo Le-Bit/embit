@@ -1,22 +1,16 @@
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import Login from "@/views/Login.vue";
-import { store } from "@/store";
+import { createTestPinia } from "../pinia-helper";
 
 describe("Login.vue", () => {
   it("renders props.msg when passed", async () => {
+    const pinia = createTestPinia();
     const email = "t@l.c";
     const password = "manage2020";
     const mockLogin = jest
-      .spyOn(Login.methods as any, "login")
+      .spyOn(Login.methods as any, "signInAction")
       .mockImplementation(() => true);
-    jest
-      .spyOn(Login.methods as any, "authAction")
-      .mockImplementation(() => true);
-    const wrapper = shallowMount(Login, {
-      global: {
-        plugins: [store],
-      },
-    });
+    const wrapper = shallowMount(Login, { global: { plugins: [pinia] } });
     const emailInput = wrapper.find("input[type=email]");
     const passwordInput = wrapper.find("input[type=password]");
 

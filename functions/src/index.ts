@@ -8,13 +8,7 @@ import {
   embyUpdatePassword,
 } from "./emby";
 
-if (process.env.NODE_ENV == "development") {
-  admin.initializeApp({
-    projectId: "embit-dev",
-  });
-} else {
-  admin.initializeApp();
-}
+admin.initializeApp();
 
 exports.claims = require("./sync");
 

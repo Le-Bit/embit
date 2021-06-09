@@ -44,9 +44,6 @@ async function createDummyAdminAccount() {
 }
 
 describe("account generation", () => {
-  beforeAll(async () => {
-    await cleanAll();
-  });
   afterEach(async () => {
     await cleanAll();
   });
