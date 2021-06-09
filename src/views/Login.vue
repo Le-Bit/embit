@@ -11,15 +11,15 @@
   </div>
   <div v-if="isUserAuth">
     <p>coucou</p>
-    <p>{{ this.getUser }}</p>
-    <p>{{ this.isAdmin }}</p>
+    <p>{{ getUser }}</p>
+    <p>{{ isAdmin }}</p>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "pinia";
-import { useAuthStore } from "@/store/auth";
+import { useAuthStore } from "../store/auth";
 
 export default defineComponent({
   name: "Login",

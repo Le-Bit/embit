@@ -1,6 +1,5 @@
-import { Auth } from "@/firebase";
+import { Auth, functions } from "../firebase";
 import firebase from "firebase/app";
-import { functions } from "@/firebase";
 import { defineStore } from "pinia";
 
 const registerUser = functions.httpsCallable("registerNewUser");
@@ -46,17 +45,12 @@ export const useAuthStore = defineStore({
         .catch((error) => (this.error = error));
     },
     authAction() {
-      console.log("authAction called");
       Auth.onAuthStateChanged((user) => {
-        console.log("auth state changed");
-        console.log(user?.getIdTokenResult());
-        console.log(this.isAdmin);
         if (user) {
           this.user = user;
           Auth.currentUser
             ?.getIdTokenResult()
             .then((idTokenResult) => (this.claims = idTokenResult))
-            .then(() => console.log(this.isAdmin))
             .catch((error) => (this.error = error));
         } else {
           this.user = null;

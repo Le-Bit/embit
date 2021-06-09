@@ -1,5 +1,5 @@
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import Register from "@/views/Register.vue";
+import Register from "../../src/views/Register.vue";
 import { createTestPinia } from "../pinia-helper";
 
 describe("Register.vue", () => {

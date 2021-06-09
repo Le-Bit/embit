@@ -1,7 +1,6 @@
-import { db } from "@/firebase";
 import { defineStore } from "pinia";
-import { useAuthStore } from "@/store/auth";
-import { functions } from "@/firebase";
+import { useAuthStore } from "./auth";
+import { functions, db } from "../firebase";
 
 const generateInvite = functions.httpsCallable("generateInvite");
 

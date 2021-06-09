@@ -1,5 +1,5 @@
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import Login from "@/views/Login.vue";
+import Login from "../../src/views/Login.vue";
 import { createTestPinia } from "../pinia-helper";
 
 describe("Login.vue", () => {

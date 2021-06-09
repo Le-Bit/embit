@@ -6,8 +6,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions } from "pinia";
-import { useAuthStore } from "@/store/auth";
-import TheNavBar from "@/components/theNavbar.vue";
+import { useAuthStore } from "./store/auth";
+import TheNavBar from "./components/theNavbar.vue";
 
 export default defineComponent({
   name: "App",

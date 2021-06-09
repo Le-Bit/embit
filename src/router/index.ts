@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import { useAuthStore } from "@/store/auth";
+import { useAuthStore } from "../store/auth";
 
 const routes: Array<RouteRecordRaw> = [
   { path: "/", name: "Home", component: () => import("../views/Home.vue") },

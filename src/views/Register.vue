@@ -35,7 +35,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions } from "pinia";
-import { useAuthStore } from "@/store/auth";
+import { useAuthStore } from "../store/auth";
 
 export default defineComponent({
   name: "Register",
