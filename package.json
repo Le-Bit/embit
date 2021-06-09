@@ -9,7 +9,7 @@
     "build": "vue-tsc --noEmit && vite build --out-dir dist",
     "build:watch": "vue-tsc --noEmit && vite build --watch",
     "build:back": "cd functions && tsc",
-    "test:unit": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 vue-cli-service test:unit",
+    "test:unit": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 jest",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },
@@ -28,6 +28,7 @@
     "vue-tsc": "^0.1.7"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.14.4",
     "@types/jest": "^26.0.23",
     "@typescript-eslint/eslint-plugin": "^4.26.1",
     "@typescript-eslint/parser": "^4.26.1",

@@ -1,5 +1,5 @@
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import Invites from "@/views/Invites.vue";
+import Invites from "../../src/views/Invites.vue";
 import { nextTick } from "vue";
 import { createTestPinia } from "../pinia-helper";
 

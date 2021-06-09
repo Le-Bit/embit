@@ -15,10 +15,12 @@ module.exports = {
     },
     {
       displayName: "vue",
-      presets: ['@babel/preset-env'],
+      presets: ["@babel/preset-env"],
       transform: {
+        "^.+\\.tsx?$": "ts-jest",
         "^.+\\.vue$": "vue-jest",
       },
+      moduleFileExtensions: ["ts", "js", "json", "vue"],
       modulePathIgnorePatterns: ["<rootDir>/functions/"],
     },
   ],

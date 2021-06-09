@@ -1,6 +1,5 @@
-import { Auth } from "@/firebase";
+import { Auth, functions } from "../firebase";
 import firebase from "firebase/app";
-import { functions } from "@/firebase";
 import { defineStore } from "pinia";
 
 const registerUser = functions.httpsCallable("registerNewUser");
