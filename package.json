@@ -4,12 +4,11 @@
   "private": true,
   "scripts": {
     "serve": "vite --open",
-    "start": "concurrently 'cd functions && npm run build -- --watch' 'NODE_ENV=development vue-cli-service build --watch' 'firebase emulators:start' ",
-    "test:start": "concurrently 'cd functions && DEV=true FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 npm run build -- --watch' 'NODE_ENV=development FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 npm run build:watch' 'firebase --project=embit-dev emulators:start' ",
-    "build": "vue-tsc --noEmit && vite build --out-dir dist",
+    "start": "concurrently 'cd functions && DEV=true FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 npm run build -- --watch' 'NODE_ENV=development FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 npm run build:watch' 'firebase --project=embit-dev emulators:start' ",
+    "build": "vue-tsc --noEmit && vite build",
     "build:watch": "vue-tsc --noEmit && vite build --watch",
     "build:back": "cd functions && tsc",
-    "test:unit": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 jest",
+    "test": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 jest",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },

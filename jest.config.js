@@ -8,6 +8,7 @@ module.exports = {
         },
       },
       roots: ["<rootDir>/functions"],
+      modulePathIgnorePatterns: ["<rootDir>/src/"],
       testMatch: ["**/__tests__/**/*.+(ts|tsx|js)"],
       transform: {
         "^.+\\.(ts|tsx)$": "ts-jest",
@@ -17,7 +18,7 @@ module.exports = {
       displayName: "vue",
       presets: ["@babel/preset-env"],
       transform: {
-        "^.+\\.tsx?$": "ts-jest",
+        "^.+\\.ts?$": "ts-jest",
         "^.+\\.vue$": "vue-jest",
       },
       moduleFileExtensions: ["ts", "js", "json", "vue"],
