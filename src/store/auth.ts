@@ -67,9 +67,10 @@ export const useAuthStore = defineStore({
     ) {
       registerUser({ email, password, inviteCode, name })
         .then(() => {
-          Auth.signInWithEmailAndPassword(email, password).then(() =>
-            this.authAction()
-          );
+          Auth.signInWithEmailAndPassword(email, password).then(() => {
+            this.authAction();
+            this.toast.setNotification("Utilisateur crée");
+          });
         })
         .catch((error) => this.toast.setError(error));
     },

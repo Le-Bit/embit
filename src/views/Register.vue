@@ -26,7 +26,7 @@
         placeholder="Code d'invitation"
       />
     </div>
-    <button type="submit" @click="signUpAction(name, email, password, invite)">
+    <button type="submit" @click="signUpAction(email, password, invite, name)">
       Register
     </button>
   </form>

@@ -1,21 +1,36 @@
 <template>
   <header id="nav">
     <nav>
-      <router-link class="nav-link" to="/admin/invites">Invites</router-link>
       <router-link class="nav-link" to="/">Home</router-link>
-      <router-link class="nav-link" to="/register">Register</router-link>
-      <router-link to="/login">
-        <div class="login-button">Login</div>
-      </router-link>
+      <span v-if="isUserAuth">
+        <router-link class="nav-link" to="/admin/invites">Invites</router-link>
+      </span>
+      <span v-if="!isUserAuth">
+        <router-link class="nav-link" to="/register">Register</router-link>
+        <router-link to="/login">
+          <div class="login-button">Login</div>
+        </router-link>
+      </span>
+      <span v-else>
+        <div class="login-button" @click="signOutAction()">Logout</div>
+      </span>
     </nav>
   </header>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapState, mapActions } from "pinia";
+import { useAuthStore } from "../store/auth";
 
 export default defineComponent({
   name: "TheNavBar",
+  computed: {
+    ...mapState(useAuthStore, ["isUserAuth"]),
+  },
+  methods: {
+    ...mapActions(useAuthStore, ["signOutAction"]),
+  },
 });
 </script>
 

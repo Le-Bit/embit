@@ -23,6 +23,9 @@ export const useToastStore = defineStore({
     getLastError(state: State) {
       return state.lastError;
     },
+    getLastNotification(state: State) {
+      return state.lastNotification;
+    },
   },
   actions: {
     setError(error: any) {
@@ -33,10 +36,13 @@ export const useToastStore = defineStore({
     hideError() {
       this.showError = false;
     },
-    setNotification(error: any) {
-      this.lastNotification = error;
+    setNotification(notif: any) {
+      this.lastNotification = notif;
       this.showNotification = true;
       setTimeout(() => (this.showNotification = false), this.showUpTime);
+    },
+    hideNotification() {
+      this.showNotification = false;
     },
   },
 });

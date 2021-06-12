@@ -7,11 +7,19 @@ const routes: Array<RouteRecordRaw> = [
     path: "/login",
     name: "Login",
     component: () => import("../views/Login.vue"),
+    beforeEnter: (to, from) => {
+      const store = useAuthStore();
+      return !store.isUserAuth;
+    },
   },
   {
     path: "/register",
     name: "Register",
     component: () => import("../views/Register.vue"),
+    beforeEnter: (to, from) => {
+      const store = useAuthStore();
+      return !store.isUserAuth;
+    },
   },
   {
     path: "/admin/invites",

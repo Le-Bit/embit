@@ -1,6 +1,5 @@
 <template>
   <the-nav-bar />
-  <button @click="setError('lol')">ToggleToast</button>
   <router-view />
   <the-toast />
 </template>
@@ -9,7 +8,6 @@
 import { defineComponent } from "vue";
 import { mapActions } from "pinia";
 import { useAuthStore } from "./store/auth";
-import { useToastStore } from "./store/toast";
 import TheNavBar from "./components/theNavbar.vue";
 import TheToast from "./components/TheToast.vue";
 
@@ -29,7 +27,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useAuthStore, ["authAction"]),
-    ...mapActions(useToastStore, ["setError"]),
   },
 });
 </script>

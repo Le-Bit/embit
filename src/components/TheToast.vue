@@ -1,7 +1,14 @@
 <template>
   <transition name="toast">
     <div v-if="showError" class="toast-wrapper">
-      <div class="toast-elem" @click="hideError()">{{ getLastError }}</div>
+      <div class="toast-elem bad" @click="hideError()">{{ getLastError }}</div>
+    </div>
+  </transition>
+  <transition name="toast">
+    <div v-if="showNotification" class="toast-wrapper">
+      <div class="toast-elem good" @click="hideNotification()">
+        {{ getLastNotification }}
+      </div>
     </div>
   </transition>
 </template>
@@ -14,10 +21,20 @@ import { mapActions, mapState } from "pinia";
 export default defineComponent({
   name: "TheToast",
   computed: {
-    ...mapState(useToastStore, ["showError", "getLastError"]),
+    ...mapState(useToastStore, [
+      "showError",
+      "getLastError",
+      "showNotification",
+      "getLastNotification",
+    ]),
   },
   methods: {
-    ...mapActions(useToastStore, ["setError", "hideError"]),
+    ...mapActions(useToastStore, [
+      "setError",
+      "hideError",
+      "setNotification",
+      "hideNotification",
+    ]),
   },
 });
 </script>
@@ -34,19 +51,27 @@ export default defineComponent({
   cursor: pointer;
   padding: 0.5em;
   border-radius: 10px;
-  background-color: hsl(120, 62%, 73%);
+  background-color: hsl(0, 62%, 73%);
   color: hsl(0, 62%, 10%);
 }
+
+.good {
+  background-color: hsl(120, 62%, 73%);
+}
+
 .toast-enter-active {
   animation: wobble 0.5s ease;
 }
+
 .toast-leave-to {
   opacity: 0;
   transform: translateY(60px);
 }
+
 .toast-leave-active {
   transition: all 0.3s ease;
 }
+
 @keyframes toasting {
   0% {
     transform: translateY(100px);
@@ -57,6 +82,7 @@ export default defineComponent({
     opacity: 1;
   }
 }
+
 @keyframes wobble {
   0% {
     transform: translateY(100px);
